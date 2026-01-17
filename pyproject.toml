@@ -8,3 +8,7 @@ ignore = []
 
 [tool.ruff.lint.isort]
 known-first-party = ["imre", "wfm_core", "shifts"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "imre.settings"
+python_files = ["tests.py", "test_*.py"]
