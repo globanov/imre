@@ -2,6 +2,7 @@
 from datetime import time
 
 import pytest
+
 from wfm_core.shift import Shift
 
 

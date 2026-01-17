@@ -1,5 +1,6 @@
 from datetime import time
 
+
 def _round_minutes_to_quarter_hours(minutes: int) -> float:
     return round(minutes / 15) * 15 / 60.0
 

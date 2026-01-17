@@ -9,3 +9,5 @@ __pycache__/
 .gigaide/
 .idea/
 
+# Ruff
+.ruff_cache/
