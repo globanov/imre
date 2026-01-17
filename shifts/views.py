@@ -1,2 +1,37 @@
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-# Create your views here.
+from wfm_core.shift import Shift
+
+from .serializers import ShiftSerializer
+
+
+class ShiftCreateView(APIView):
+    def post(self, request):
+        serializer = ShiftSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Передаём данные в доменную модель
+            shift = Shift(
+                staff_id=serializer.validated_data["staff_id"],
+                date=serializer.validated_data["date"].isoformat(),  # строка YYYY-MM-DD
+                start_time=serializer.validated_data["start_time"],  # time object
+                end_time=serializer.validated_data["end_time"],
+            )
+        except (ValueError, TypeError) as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Возвращаем успешный ответ
+        return Response(
+            {
+                "staff_id": shift.staff_id,
+                "date": shift.date,
+                "start_time": shift.start_time.isoformat(),
+                "end_time": shift.end_time.isoformat(),
+                "duration_hours": shift.duration_hours,
+            },
+            status=status.HTTP_201_CREATED,
+        )
