@@ -30,3 +30,17 @@ class ShiftAPITest(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("duration must be between 1 and 12 hours", str(response.data))
+
+    def test_rejects_non_integer_staff_id(self):
+        response = self.client.post(
+            "/api/shifts/",
+            {
+                "staff_id": "not-a-number",
+                "date": "2026-06-15",
+                "start_time": "09:00",
+                "end_time": "18:00",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("staff_id", response.data)
