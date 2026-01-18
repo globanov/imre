@@ -29,6 +29,7 @@ class ShiftAPITest(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # noinspection PyUnresolvedReferences
         self.assertIn("duration must be between 1 and 12 hours", str(response.data))
 
     def test_rejects_non_integer_staff_id(self):
@@ -43,4 +44,15 @@ class ShiftAPITest(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # noinspection PyUnresolvedReferences
         self.assertIn("staff_id", response.data)
+
+    def test_rejects_start_time_not_before_end_time(self):
+        response = self.client.post(
+            "/api/shifts/",
+            {"staff_id": 17, "date": "2026-06-15", "start_time": "18:00", "end_time": "09:00"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # noinspection PyUnresolvedReferences
+        self.assertIn("start_time must be before end_time", str(response.data))
