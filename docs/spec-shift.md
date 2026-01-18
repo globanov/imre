@@ -1,13 +1,13 @@
-# Спецификация: Смена (Shift)
+# Specification: Shift
 
-Смена — период работы сотрудника в конкретный день.
+A shift is a period during which a staff member works on a specific date.
 
-## Атрибуты
-- `staff_id`: целое число ≥ 1
-- `date`: дата в формате ISO (YYYY-MM-DD)
-- `start_time`: время начала (HH:MM)
-- `end_time`: время окончания (HH:MM)
+## Attributes
+- `staff_id`: integer ≥ 1
+- `date`: ISO date (YYYY-MM-DD)
+- `start_time`: start time (HH:MM)
+- `end_time`: end time (HH:MM)
 
-## Правила
-1. **Длительность**: от 1 до 12 часов, округляется до 15 минут (0.25 часа).
-2. **Время**: `start_time` < `end_time`, оба значения относятся к одному дню (`date`).
+## Rules
+1. **Duration**: between 1 and 12 hours, rounded to 15 minutes (0.25 hours).
+2. **Time**: `start_time` < `end_time`, both belong to the same day (`date`).
