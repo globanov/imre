@@ -1,3 +1,6 @@
-# Global event publisher — replaced in tests
+from wfm_core.worker import handle_shift_created
+
+
 def publish(event):
-    pass  # no-op by default
+    """Publish event to subscribers (currently sync)."""
+    handle_shift_created(event)
