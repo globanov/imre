@@ -14,17 +14,17 @@ class ShiftCreateView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Передаём данные в доменную модель
+            # Pass data to domain model
             shift = Shift(
                 staff_id=serializer.validated_data["staff_id"],
-                date=serializer.validated_data["date"].isoformat(),  # строка YYYY-MM-DD
+                date=serializer.validated_data["date"].isoformat(),  # ISO string YYYY-MM-DD
                 start_time=serializer.validated_data["start_time"],  # time object
                 end_time=serializer.validated_data["end_time"],
             )
         except (ValueError, TypeError) as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Возвращаем успешный ответ
+        # Return success response
         return Response(
             {
                 "staff_id": shift.staff_id,

@@ -20,7 +20,7 @@ class ShiftAPITest(TestCase):
         self.assertEqual(data["date"], "2026-06-15")
         self.assertEqual(data["start_time"], "09:00:00")
         self.assertEqual(data["end_time"], "18:00:00")
-        self.assertEqual(data["duration_hours"], 9.0)  # 9 часов
+        self.assertEqual(data["duration_hours"], 9.0)  # 9 hours
 
     def test_rejects_shift_shorter_than_1_hour(self):
         response = self.client.post(
