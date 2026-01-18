@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: imre-api
+    env: python
+    region: frankfurt # или ваш регион
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    startCommand: "gunicorn imre.wsgi:application"
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: SECRET_KEY
+        generateValue: true
+    healthCheckPath: /api/shifts/
+    autoDeploy: true
+
+databases:
+  - name: imre-db
+    databaseName: imre
+    user: imre_user
