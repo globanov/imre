@@ -11,29 +11,29 @@ class ShiftAPITest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-    @patch("shifts.views.publish")
-    def test_create_valid_shift(self, mock_publish):
-        response = self.client.post(
-            "/api/shifts/",
-            {"staff_id": 17, "date": "2026-06-15", "start_time": "09:00", "end_time": "18:00"},
-            format="json",
-        )
+    def test_create_valid_shift(self):
+        with patch("shifts.views.publish") as mock_publish:
+            response = self.client.post(
+                "/api/shifts/",
+                {"staff_id": 17, "date": "2026-06-15", "start_time": "09:00", "end_time": "18:00"},
+                format="json",
+            )
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        data = response.json()
-        self.assertEqual(data["staff_id"], 17)
-        self.assertEqual(data["date"], "2026-06-15")
-        self.assertEqual(data["start_time"], "09:00:00")
-        self.assertEqual(data["end_time"], "18:00:00")
-        self.assertEqual(data["duration_hours"], 9.0)  # 9 hours
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            data = response.json()
+            self.assertEqual(data["staff_id"], 17)
+            self.assertEqual(data["date"], "2026-06-15")
+            self.assertEqual(data["start_time"], "09:00:00")
+            self.assertEqual(data["end_time"], "18:00:00")
+            self.assertEqual(data["duration_hours"], 9.0)  # 9 hours
 
-        # Verify event was published
-        mock_publish.assert_called_once()
-        args, _ = mock_publish.call_args
-        event = args[0]
-        assert isinstance(event, ShiftCreated)
-        assert event.staff_id == 17
-        assert event.duration_hours == 9.0
+            # Verify event was published
+            mock_publish.assert_called_once()
+            args, _ = mock_publish.call_args
+            event = args[0]
+            assert isinstance(event, ShiftCreated)
+            assert event.staff_id == 17
+            assert event.duration_hours == 9.0
 
     def test_rejects_shift_shorter_than_1_hour(self):
         with patch("shifts.views.publish") as mock_publish:
