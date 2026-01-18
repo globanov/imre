@@ -2,8 +2,10 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from wfm_core.events import ShiftCreated
 from wfm_core.shift import Shift
 
+from .event_publisher import publish
 from .serializers import ShiftSerializer
 
 
@@ -23,6 +25,16 @@ class ShiftCreateView(APIView):
             )
         except (ValueError, TypeError) as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Publish domain event
+        event = ShiftCreated(
+            staff_id=shift.staff_id,
+            date=shift.date,
+            start_time=shift.start_time.isoformat(),
+            end_time=shift.end_time.isoformat(),
+            duration_hours=shift.duration_hours,
+        )
+        publish(event)
 
         # Return success response
         return Response(
