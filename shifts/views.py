@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 
 from wfm_core.events import ShiftCreated
 from wfm_core.shift import Shift
+from wfm_core.worker import workload_store
 
 from .event_publisher import publish
 from .serializers import ShiftSerializer
@@ -46,4 +47,19 @@ class ShiftCreateView(APIView):
                 "duration_hours": shift.duration_hours,
             },
             status=status.HTTP_201_CREATED,
+        )
+
+
+class WorkloadRetrieveView(APIView):
+    def get(self, request, staff_id: int, week_start: str):
+        key = (staff_id, week_start)
+        if key not in workload_store:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        workload = workload_store[key]
+        return Response(
+            {
+                "staff_id": workload.staff_id,
+                "week_start": workload.week_start,
+                "total_hours": workload.total_hours,
+            }
         )
