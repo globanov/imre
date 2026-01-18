@@ -4,9 +4,9 @@ from rest_framework.views import APIView
 
 from wfm_core.events import ShiftCreated
 from wfm_core.shift import Shift
-from wfm_core.worker import workload_store
 
 from .event_publisher import publish
+from .models import WeeklyWorkload
 from .serializers import ShiftSerializer
 
 
@@ -17,17 +17,15 @@ class ShiftCreateView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Pass data to domain model
             shift = Shift(
                 staff_id=serializer.validated_data["staff_id"],
-                date=serializer.validated_data["date"].isoformat(),  # ISO string YYYY-MM-DD
-                start_time=serializer.validated_data["start_time"],  # time object
+                date=serializer.validated_data["date"].isoformat(),
+                start_time=serializer.validated_data["start_time"],
                 end_time=serializer.validated_data["end_time"],
             )
         except (ValueError, TypeError) as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Publish domain event
         event = ShiftCreated(
             staff_id=shift.staff_id,
             date=shift.date,
@@ -37,7 +35,6 @@ class ShiftCreateView(APIView):
         )
         publish(event)
 
-        # Return success response
         return Response(
             {
                 "staff_id": shift.staff_id,
@@ -52,14 +49,15 @@ class ShiftCreateView(APIView):
 
 class WorkloadRetrieveView(APIView):
     def get(self, request, staff_id: int, week_start: str):
-        key = (staff_id, week_start)
-        if key not in workload_store:
+        try:
+            workload = WeeklyWorkload.objects.get(staff_id=staff_id, week_start=week_start)
+        except WeeklyWorkload.DoesNotExist:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-        workload = workload_store[key]
+
         return Response(
             {
                 "staff_id": workload.staff_id,
-                "week_start": workload.week_start,
+                "week_start": workload.week_start.isoformat(),
                 "total_hours": workload.total_hours,
             }
         )
