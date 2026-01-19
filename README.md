@@ -15,50 +15,35 @@ graph LR
 
 ✅ No message broker (Redis/Kafka) — synchronous processing ensures simplicity and consistency for MVP.
 
-## Request Flow
+## Request Flow (Sequence Diagram)
 
 ```mermaid
-flowchart TD
-    subgraph Client
-        A["POST /api/shifts/"]
-        B["GET /api/workload/staff/:id/week/:date"]
-    end
-
-    subgraph API_Layer
-        A --> C[ShiftCreateView]
-        B --> D[WorkloadRetrieveView]
-    end
-
-    subgraph Validation_and_Domain
-        C --> E[ShiftSerializer<br>staff_id, date, time]
-        E -->|Valid| F[wfm_core.Shift<br>validate duration,<br>round to 15min]
-        F -->|Invalid| G[400 Bad Request]
-        F -->|Valid| H[Create ShiftCreated Event]
-    end
-
-    subgraph Event_Processing
-        H --> I[handle_shift_created]
-        I --> J[Begin DB Transaction]
-        J --> K[GetOrCreate WeeklyWorkload<br>staff_id + week_start]
-        K --> L[Add duration_hours]
-        L --> M[Save WeeklyWorkload]
-        M --> N[Commit Transaction]
-    end
-
-    subgraph Read_Path
-        D --> O[Query WeeklyWorkload<br>by staff_id, week_start]
-        O -->|Found| P[200 OK + JSON]
-        O -->|Not Found| Q[404 Not Found]
-    end
-
-    style A fill:#e6f3ff,stroke:#0066cc
-    style B fill:#e6f3ff,stroke:#0066cc
-    style C fill:#d4f7e5,stroke:#2e8b57
-    style D fill:#d4f7e5,stroke:#2e8b57
-    style F fill:#d4f7e5,stroke:#2e8b57
-    style I fill:#d4f7e5,stroke:#2e8b57
-    style K fill:#d4f7e5,stroke:#2e8b57
-    style O fill:#d4f7e5,stroke:#2e8b57
+sequenceDiagram
+    participant C as Client
+    participant V as ShiftCreateView
+    participant S as ShiftSerializer
+    participant D as wfm_core.Shift
+    participant E as Event Handler Caller
+    participant W as Event Handler
+    participant M as WeeklyWorkload Model
+    participant DB as Database
+    
+    C->>V: POST /api/shifts/
+    V->>S: validate(data)
+    S-->>V: validated_data
+    V->>D: Shift(...)
+    D-->>V: shift object
+    V->>E: publish(event)
+    E->>W: handle_shift_created(event)
+    W->>M: get_or_create()
+    M->>DB: SELECT/INSERT
+    DB-->>M: workload record
+    M->>DB: UPDATE total_hours
+    DB-->>M: OK
+    M-->>W: updated
+    W-->>E: done
+    E-->>V: done
+    V-->>C: 201 Created + shift data
 ```
 
 ## Domain Model (Clean Architecture + DDD)
