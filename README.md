@@ -77,7 +77,6 @@ graph TB
 ```
 
 ## Data Model (ER Diagram)
-
 ```mermaid
 erDiagram
     WeeklyWorkload ||--o{ Shift : aggregates
@@ -94,8 +93,6 @@ erDiagram
         time end_time
         float duration_hours
     }
-    
-    note right of Shift: "NOT persisted in DB<br/>Only event data"
 ```
 
 ✅ **Green = implemented and working**
