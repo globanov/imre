@@ -76,6 +76,28 @@ graph TB
     style Models fill:#e8f5e8
 ```
 
+## Data Model (ER Diagram)
+
+```mermaid
+erDiagram
+    WeeklyWorkload ||--o{ Shift : aggregates
+    WeeklyWorkload {
+        integer staff_id PK
+        date week_start PK
+        float total_hours
+    }
+    
+    Shift {
+        integer staff_id
+        string date
+        time start_time
+        time end_time
+        float duration_hours
+    }
+    
+    note right of Shift: "NOT persisted in DB<br/>Only event data"
+```
+
 ✅ **Green = implemented and working**
 
 ## Features
