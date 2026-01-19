@@ -64,19 +64,31 @@ flowchart TD
 ## Domain Model (Clean Architecture + DDD)
 
 ```mermaid
-graph TD
-    A[Client] -->|HTTP| B[Django API<br><i>Framework Layer</i>]
-    B --> C["wfm_core.Shift<br><i>Entity / Domain</i>"]
-    C --> D[(PostgreSQL<br><i>Infrastructure</i>)]
-    C -->|event| E["Event Handler<br><i>Application Service</i>"]
-    E --> F["WeeklyWorkload Model<br><i>Django ORM → DB</i>"]
-    F --> D
+graph TB
+    subgraph "Внешние системы"
+        Client["Клиент (HTTP/REST)"]
+        Admin["Админ (Django Admin)"]
+    end
     
-    style C fill:#d4f7e5,stroke:#2e8b57
-    style F fill:#d4f7e5,stroke:#2e8b57
-    style B fill:#d4f7e5,stroke:#2e8b57
-    style E fill:#d4f7e5,stroke:#2e8b57
-    style D fill:#d4f7e5,stroke:#2e8b57
+    subgraph "IMRE Application"
+        API["Django API Layer<br/>DRF Views/Serializers"]
+        Domain["Domain Layer<br/>(wfm_core.Shift)"]
+        EventHandler["Event Handler<br/>(handle_shift_created)"]
+        Models["Data Models<br/>(WeeklyWorkload)"]
+        DB[(PostgreSQL/SQLite)]
+    end
+    
+    Client --> API
+    API --> Domain
+    Domain -->|publish ShiftCreated| EventHandler
+    EventHandler --> Models
+    Admin --> Models
+    Models --> DB
+    
+    style API fill:#e1f5fe
+    style Domain fill:#f3e5f5
+    style EventHandler fill:#fff3e0
+    style Models fill:#e8f5e8
 ```
 
 ✅ **Green = implemented and working**
@@ -88,7 +100,7 @@ graph TD
   - Enforces start < end
   - Rounds duration to 15-minute intervals
 - ✅ **Workload aggregation** (`GET /api/workload/staff/{staff_id}/week/{week_start}`)
-  - Stores weekly totals in PostgreSQL
+  - Stores weekly totals in database
   - `week_start` must be **Monday** of the ISO week (e.g., `2026-06-15`)
 - ✅ **Event-driven design**
   - `ShiftCreated` event published on success
@@ -99,14 +111,16 @@ graph TD
   - End-to-end tests for full flow
 - ✅ **Deployment-ready**
   - `render.yaml` included
-  - Supports PostgreSQL in production
-  - SQLite for local development
+  - **Production**: PostgreSQL on Render.com
+  - **Development**: SQLite (zero setup)
 
 ## Tech Stack
 
 - **Backend**: Python 3.11, Django 5.0, DRF
 - **Domain**: Pure Python (no framework dependencies)
-- **Database**: PostgreSQL (production), SQLite (local)
+- **Database**:
+  - **Development**: SQLite (zero setup)
+  - **Production**: PostgreSQL
 - **Deployment**: Render.com (free tier)
 - **Quality**: ruff, pytest, pre-commit
 
