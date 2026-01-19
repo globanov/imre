@@ -1,4 +1,3 @@
-BEGIN
 # IMRE: Intelligent Workforce Management Reference Implementation
 
 Event-driven system for shift scheduling and workload aggregation.  
@@ -88,9 +87,9 @@ graph TD
   - Validates duration (1–12 hours)
   - Enforces start < end
   - Rounds duration to 15-minute intervals
-- ✅ **Workload aggregation** (`GET /api/workload/staff/:id/week/:date`)
+- ✅ **Workload aggregation** (`GET /api/workload/staff/{staff_id}/week/{week_start}`)
   - Stores weekly totals in PostgreSQL
-  - ISO week start (Monday)
+  - `week_start` must be **Monday** of the ISO week (e.g., `2026-06-15`)
 - ✅ **Event-driven design**
   - `ShiftCreated` event published on success
   - Synchronous processing
@@ -130,7 +129,7 @@ curl -X POST http://localhost:8000/api/shifts/ \
   -H "Content-Type: application/json" \
   -d '{"staff_id": 17, "date": "2026-06-15", "start_time": "09:00", "end_time": "18:00"}'
 
-# Get workload
+# Get workload (week_start must be Monday)
 curl http://localhost:8000/api/workload/staff/17/week/2026-06-15/
 ```
 
@@ -148,11 +147,11 @@ Push to GitHub → auto-deployed to [Render.com](https://render.com).
   - The **weekly aggregate** is updated correctly (thanks to `unique_together` on `(staff_id, week_start)`),
   - But there is **no uniqueness constraint on shifts** (e.g., `(staff_id, date, start_time, end_time)`).
   - → **Technical debt**: add shift persistence with uniqueness, or implement request-level idempotency (e.g., via `Idempotency-Key` header).
-  
+
 ## Roadmap
 
 - [ ] Idempotency (prevent duplicate processing)
-- [ ] Week validation (only Mondays)
+- [ ] Normalize any date in week to Monday (improve API UX)
+- [ ] Week validation (ensure input is Monday)
 - [ ] Timezone support
 - [ ] Async processing (Celery + Redis)
-  ENDDD
