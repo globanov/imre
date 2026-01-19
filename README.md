@@ -144,9 +144,11 @@ Push to GitHub → auto-deployed to [Render.com](https://render.com).
 
 - **Why synchronous?** Simplicity, atomicity, and debuggability for MVP.
 - **Why no Redis?** Avoid operational complexity until needed.
-- **Known limitation**: Repeated identical requests will duplicate workload hours.  
-  → **Technical debt**: add idempotency via event deduplication or shift uniqueness.
-
+- **Known limitation**: Sending the same shift creation request multiple times will result in duplicate hours, because shifts themselves are not stored or deduplicated.
+  - The **weekly aggregate** is updated correctly (thanks to `unique_together` on `(staff_id, week_start)`),
+  - But there is **no uniqueness constraint on shifts** (e.g., `(staff_id, date, start_time, end_time)`).
+  - → **Technical debt**: add shift persistence with uniqueness, or implement request-level idempotency (e.g., via `Idempotency-Key` header).
+  
 ## Roadmap
 
 - [ ] Idempotency (prevent duplicate processing)
