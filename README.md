@@ -155,6 +155,16 @@ curl http://localhost:8000/api/workload/staff/17/week/2026-06-15/
 
 Live demo: [https://imre-340q.onrender.com](https://imre-340q.onrender.com)
 
+Before using need some time to environment wake up (first request takes about 30 seconds)
+
+```bash
+# Create a shift
+curl -X POST https://imre-340q.onrender.com/api/shifts/ -H "Content-Type: application/json" -d '{"staff_id": 17, "date": "2026-06-15", "start_time": "10:00", "end_time": "14:30"}'
+
+# Get workload (week_start must be Monday)
+curl https://imre-340q.onrender.com/api/workload/staff/17/week/2026-06-15/
+```
+
 Push to GitHub → auto-deployed to [Render.com](https://render.com).
 
 ## Architecture Notes
